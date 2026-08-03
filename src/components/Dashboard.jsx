@@ -114,8 +114,22 @@ export default function Dashboard() {
   }, []);
 
   const scopedTickets = useMemo(() => {
-    return tickets.filter(ticket => ticket.assignedWorker === userMeta.name);
-  }, [tickets, userMeta.name]);
+    return tickets.filter(ticket => {
+      if (ticket.assignedWorker === userMeta.name) return true;
+      if (!ticket.assignedWorker) {
+        const role = userMeta.role || '';
+        const cat = ticket.type || '';
+        const r = role.toLowerCase();
+        const c = cat.toLowerCase();
+        if (r.includes('plumb') || r.includes('water')) return c.includes('water');
+        if (r.includes('clean') || r.includes('house')) return c.includes('clean');
+        if (r.includes('elect')) return c.includes('elect');
+        if (r.includes('furnit')) return c.includes('furnit');
+        if (r === 'worker') return true;
+      }
+      return false;
+    });
+  }, [tickets, userMeta.name, userMeta.role]);
 
   const filteredTickets = useMemo(() => {
     if (statusFilter === 'All') return scopedTickets;
@@ -140,8 +154,13 @@ export default function Dashboard() {
 
   const updateTicketStatus = async (ticketId, targetStatus) => {
     const apiStatus = targetStatus === 'Completed' ? 'Resolved' : targetStatus;
+    const updates = { status: apiStatus };
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (ticket && !ticket.assignedWorker) {
+      updates.assignedWorker = userMeta.name;
+    }
     try {
-      await api.updateComplaint(ticketId, { status: apiStatus }, token);
+      await api.updateComplaint(ticketId, updates, token);
       loadTickets();
     } catch (err) {
       console.warn('Could not update complaint status:', err.message);

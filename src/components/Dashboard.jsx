@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../apiClient';
 
 const INITIAL_SYSTEM_TICKETS = [
   { id: 'GU-PL-902', block: 'Block-A (Boys Residence)', floor: '3rd Floor', room: 'Room 304-A', type: 'Plumbing & Water Supply', details: 'Leaking bathroom flush tank valve causing continuous floor water logging.', status: 'Pending', completionDate: null },
@@ -37,7 +38,7 @@ const ADMIN_MASTER_ATTENDANCE_DB = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user: authUser, logout } = useAuth();
+  const { user: authUser, logout, token } = useAuth();
   const user = authUser || { name: 'Staff Member', email: 'staff@geeta.edu.in', role: 'Plumbing & Water Supply' };
   const onLogout = () => {
     logout();
@@ -50,10 +51,7 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('All'); 
   const fileInputRef = useRef(null);
   
-  const [tickets, setTickets] = useState(() => {
-    const localData = localStorage.getItem('gu_hostel_tickets');
-    return localData ? JSON.parse(localData) : INITIAL_SYSTEM_TICKETS;
-  });
+  const [tickets, setTickets] = useState([]);
 
   const [userMeta, setUserMeta] = useState(() => {
     const localUser = localStorage.getItem(`gu_user_meta_${user.email || 'default'}`);
@@ -68,9 +66,28 @@ export default function Dashboard() {
     };
   });
 
+  const loadTickets = useCallback(() => {
+    if (!token) return;
+    api.getComplaints(token)
+      .then((data) => {
+        setTickets(data.map((c) => ({
+          id: c.id,
+          block: c.room ? (c.room.startsWith('A') ? 'Block-A (Boys Residence)' : c.room.startsWith('B') ? 'Block-B (International)' : 'Block-C (Girls Wing)') : 'General Area',
+          floor: c.room ? (c.room.includes('-0') ? 'Ground Floor' : c.room.includes('-1') ? '1st Floor' : c.room.includes('-2') ? '2nd Floor' : c.room.includes('-3') ? '3rd Floor' : '4th Floor') : 'N/A',
+          room: c.room || 'N/A',
+          type: c.category,
+          details: c.description || c.title,
+          status: c.status === 'Resolved' ? 'Completed' : c.status,
+          completionDate: c.status === 'Resolved' ? c.createdAt : null,
+          assignedWorker: c.assignedWorker
+        })));
+      })
+      .catch((err) => console.warn('Could not load complaints:', err.message));
+  }, [token]);
+
   useEffect(() => {
-    localStorage.setItem('gu_hostel_tickets', JSON.stringify(tickets));
-  }, [tickets]);
+    loadTickets();
+  }, [loadTickets]);
 
   useEffect(() => {
     localStorage.setItem(`gu_user_meta_${user.email || 'default'}`, JSON.stringify(userMeta));
@@ -97,8 +114,8 @@ export default function Dashboard() {
   }, []);
 
   const scopedTickets = useMemo(() => {
-    return tickets.filter(ticket => ticket.type === userMeta.role);
-  }, [tickets, userMeta.role]);
+    return tickets.filter(ticket => ticket.assignedWorker === userMeta.name);
+  }, [tickets, userMeta.name]);
 
   const filteredTickets = useMemo(() => {
     if (statusFilter === 'All') return scopedTickets;
@@ -121,18 +138,14 @@ export default function Dashboard() {
     return counts;
   }, [scopedTickets]);
 
-  const updateTicketStatus = (ticketId, targetStatus) => {
-    const todayStr = '2026-07-03';
-    setTickets(prev => prev.map(t => {
-      if (t.id === ticketId) {
-        return { 
-          ...t, 
-          status: targetStatus,
-          completionDate: targetStatus === 'Completed' ? todayStr : t.completionDate 
-        };
-      }
-      return t;
-    }));
+  const updateTicketStatus = async (ticketId, targetStatus) => {
+    const apiStatus = targetStatus === 'Completed' ? 'Resolved' : targetStatus;
+    try {
+      await api.updateComplaint(ticketId, { status: apiStatus }, token);
+      loadTickets();
+    } catch (err) {
+      console.warn('Could not update complaint status:', err.message);
+    }
   };
 
 

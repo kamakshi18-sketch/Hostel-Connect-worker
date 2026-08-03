@@ -43,6 +43,10 @@ export const api = {
     request("/api/attendance/mark", { method: "POST", body: payload, token }),
   toggleAttendance: (id, token) =>
     request(`/api/attendance/${id}/toggle`, { method: "PATCH", token }),
+
+  getComplaints: (token) => request("/api/complaints", { token }),
+  updateComplaint: (id, updates, token) =>
+    request(`/api/complaints/${id}`, { method: "PATCH", body: updates, token }),
 };
 
 export default api;

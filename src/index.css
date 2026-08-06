@@ -9,12 +9,11 @@
   --color-ink-850: #f5f3ff;
   --color-ink-800: #e9e3ff; /* Border */
   --color-ink-700: #c7b8ff; /* Accent border */
-  --color-ink-600: #f5f3ff;
-  --color-ink-500: #737686;
-  --color-ink-400: #655a8f; /* Muted text */
-  --color-ink-300: #655a8f; /* Secondary text */
-  --color-ink-200: #1a103c; /* Primary text */
-  --color-ink-100: #1a103c;
+  --color-ink-450: #000000;
+  --color-ink-400: #000000; /* Muted text */
+  --color-ink-300: #000000; /* Secondary text */
+  --color-ink-200: #000000; /* Primary text */
+  --color-ink-100: #000000;
 
   /* Accent purple primary palette */
   --color-primary: #7c3aed;
@@ -63,4 +62,50 @@ button[type="submit"] .text-white,
 }
 .hover\:bg-neutral-800\/40:hover {
   background-color: rgba(245, 243, 255, 0.4) !important;
+}
+
+/* Force all text in the worker portal to black */
+body {
+  color: #000000 !important;
+}
+
+h1, h2, h3, h4, h5, h6, p, span, label, input, select, textarea {
+  color: #000000 !important;
+}
+
+.text-white, 
+.text-neutral-200, 
+.text-neutral-300, 
+.text-neutral-400, 
+.text-gray-400,
+.text-gray-500,
+.text-ink-100, 
+.text-ink-200, 
+.text-ink-300, 
+.text-ink-400 {
+  color: #000000 !important;
+}
+
+/* Maintain white text on active elements and buttons */
+.bg-primary .text-white, 
+.bg-emerald-600 .text-white, 
+.bg-blue-600 .text-white,
+button[type="submit"] .text-white,
+.text-white.bg-neutral-800,
+.text-white.bg-\[\#d15903\],
+button.bg-primary,
+button.bg-primary *,
+button[type="submit"],
+button[type="submit"] * {
+  color: #ffffff !important;
+}
+
+/* Sidebar active states */
+a.active,
+a.active * {
+  color: #ffffff !important;
+}
+
+a:not(.active) {
+  color: #000000 !important;
 }

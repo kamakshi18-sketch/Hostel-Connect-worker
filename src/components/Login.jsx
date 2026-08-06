@@ -35,7 +35,7 @@ export default function Login() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
         <div className="absolute bottom-16 left-16 max-w-md space-y-4">
-          <span className="text-xs font-bold tracking-widest text-primary uppercase border-l-2 border-primary pl-2">
+          <span className="text-xs font-bold tracking-widest text-warn uppercase border-l-2 border-warn pl-2">
             A Modern Hostel Experience
           </span>
           <h1 className="text-5xl font-black tracking-tight text-white leading-none">Live, Learn,<br />Belong.</h1>

@@ -29,6 +29,9 @@ body {
 }
 
 /* Custom CSS overrides for hardcoded background & border colors in Worker Dashboard */
+.bg-\[\#09090b\] {
+  background-color: #fcfaff !important;
+}
 .bg-\[\#121214\] {
   background-color: #ffffff !important;
 }
@@ -42,10 +45,10 @@ body {
   border-color: #e9e3ff !important;
 }
 .text-gray-400, .text-neutral-500 {
-  color: #655a8f !important;
+  color: #000000 !important;
 }
 .text-white {
-  color: #1a103c !important;
+  color: #000000 !important;
 }
 /* Ensure white text inside buttons or active tabs stays white */
 .bg-primary .text-white, 
@@ -69,7 +72,7 @@ body {
   color: #000000 !important;
 }
 
-h1, h2, h3, h4, h5, h6, p, span, label, input, select, textarea {
+h1, h2, h3, h4, h5, h6, p, span, label, input, select, textarea, div, td, th, li, a {
   color: #000000 !important;
 }
 
